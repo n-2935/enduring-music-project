@@ -1,0 +1,101 @@
+"Ranking","Artist_Name","Spotify_Artist_ID","Spotify_Popularity","Genre","Billboard_Popularity","track_id","track_name","track_release","decade","Danceability","Energy","Valence","Endurance_Index"
+100,"Talking Heads","2x9SpqnPi8rlE9pjHBwmSC",67,"rock",0,"1i6N76fftMZhijOzFQ5ZtL","Psycho Killer - 2005 Remaster","1977-09-16",1970,0.721,0.521,0.942,33.5
+99,"Carl Perkins","5hIClg6noTaCzMu2s5wp4f",44,"rock",0,"5d6ZRqgbz26Sg4bk1oifQw","Blue Suede Shoes","1957-01-01",1950,0.548,0.673,0.965,22
+98,"Curtis Mayfield","2AV6XDIs32ofIJhkkDevjm",57,"soul",0,"2qrOktpT4UcQKldz0QRCmD","Move On Up","2020-10-30",2020,0.538,0.969,0.928,28.5
+97,"R.E.M.","4KWTAlx2RvbpseOGMEmROg",72,"rock",0,"31AOj9sFz2gM0O3hMARRBx","Losing My Religion","1991-03-12",1990,0.666,0.855,0.803,36
+96,"Diana Ross and the Supremes","0rXI0q8Cahq6numvPlloaq",45,"soul",0,"6kAS4yj3wHJXcLp93vr5aG","You Can't Hurry Love","2017-11-17",2010,0.459,0.767,0.618,22.5
+95,"Lynyrd Skynyrd","4MVyzYMgTwdP7Z49wAZHx0",70,"rock",29,"7e89621JPkKaeDSTQ3avtg","Sweet Home Alabama","1974-04-15",1970,0.596,0.605,0.886,49.5
+94,"Nine Inch Nails","0X380XXQSNBYuleKzav5UO",64,"rock",1,"2oDqmfa2g8W893LlwJG1qu","Closer","1994-03-08",1990,0.547,0.714,0.541,32.5
+93,"Booker T. and the MGs","2vDV0T8sxx2ENnKXds75e5",55,"soul",0,"4fQMGlCawbTkH9yPPZ49kP","Green Onions","1962",1960,0.816,0.514,0.912,27.5
+92,"Guns n’ Roses","3qm84nBOXUEQ2vnTfUTTFC",78,"rock",18,"7snQQk1zcKl8gZ92AnueZW","Sweet Child O' Mine","1987-07-21",1980,0.446,0.952,0.624,48
+91,"Tom Petty","2UZMlIwnkgAEDBsw1Rejkn",70,"rock",0,"5tVA6TkbaAH9QMITTQRrNv","Free Fallin'","1989-01-01",1980,0.623,0.449,0.572,35
+90,"Carlos Santana","6GI52t8N5F02MxU0g5U69P",69,"blues",2,"567UAkWoLBqZ709s3Qcbze","Maria Maria (feat. The Product G&B)","1999",1990,0.777,0.601,0.68,35.5
+89,"The Yardbirds","2lxX1ivRYp26soIavdG9bX",46,"blues",0,"3HlbrnCBdrJ1NObHLMXSZh","Heart Full of Soul - 2015 Remaster","1965",1960,0.492,0.666,0.699,23
+88,"Jay-Z","3nFkdlSjzX9mRTtwJOzDYB",82,"hip hop",2,"1auxYwYrFRqZP7t3s7w4um","Ni**as In Paris","2011-08-08",2010,0.789,0.858,0.775,42
+87,"Gram Parsons","1KA3WXYMPLxomNuoE22LYd",38,"folk",0,"72DefuF22C6aPKrWhRFCBS","Love Hurts - 2007 Remaster","1974",1970,0.461,0.296,0.303,19
+86,"Tupac Shakur","1ZwdS5xdxEREPySFridCfh",78,"hip hop",1,"3ia3dJETSOllPsv3LJkE35","California Love - Original Version","1998-01-01",1990,0.763,0.85,0.761,39.5
+85,"Black Sabbath","5M52tdBnJaKSvOpJGz8mfZ",71,"rock",1,"1Y373MqadDRtclJNdnUXVc","Paranoid - 2012 - Remaster","1970-09-18",1970,0.412,0.658,0.454,36
+84,"James Taylor","0vn7UBvSQECKJm2817Yf1P",66,"folk",3,"1oht5GevPN9t1T3kG1m1GO","Fire and Rain - 2019 Remaster","1970-02-01",1970,0.597,0.271,0.338,34.5
+83,"Eminem","7dGJo4pcD2V6oG8kP0tJRR",90,"hip hop",93,"7lQ8MOhq6IN2w8EYcFNSUk","Without Me","2002-05-26",2000,0.908,0.669,0.662,91.5
+82,"Creedence Clearwater Revival","3IYUhFvPQItj6xySrBmZkd",78,"country",31,"2LawezPeJhN4AWuSB0GtAU","Have You Ever Seen The Rain","1970-12-07",1970,0.741,0.697,0.774,54.5
+81,"The Drifters","1FqqOl9itIUpXr4jZPIVoT",64,"soul",0,"72Z28IsvEVLjSWdUKEQgZ0","White Christmas","1954",1950,0.578,0.182,0.477,32
+80,"Elvis Costello","2BGRfQgtzikz1pzAD0kaEn",54,"pop",0,"31Tp5iKrVUayn65qhg06nE","She","2012",2010,0.333,0.28,0.276,27
+79,"The Four Tops","7fIvjotigTGWqjIz6EP1i4",62,"soul",0,"6b6IMqP565TbtFFZg9iFf3","I Can't Help Myself (Sugar Pie, Honey Bunch)","1965",1960,0.667,0.599,0.971,31
+78,"The Stooges","4BFMTELQyWJU1SwqcXMBm3",49,"rock",0,"79MMMdYL00iwKVHBSAUkLY","I Wanna Be Your Dog - 2019 Remaster","1969-01-01",1960,0.523,0.941,0.145,24.5
+77,"Beastie Boys","03r4iKL2g2442PT9n2UKsx",67,"hip hop",1,"0Puj4YlTm6xNzDDADXHMI9","Sabotage","1994-05-23",1990,0.324,0.938,0.543,34
+76,"The Shirelles","0x83OBqixqdCHnStP5VMcn",50,"soul",0,"25IiJu0DjOqsnQXgNHWp5i","Will You Love Me Tomorrow","2005",2000,0.527,0.308,0.514,25
+75,"Eagles","0ECwFtbIWEVNwjlrfc6xoL",77,"rock",45,"3QIoEi8Enr9uHffwInGIsC","Please Come Home for Christmas - 2013 Remaster","1978-11-27",1970,0.612,0.289,0.466,61
+74,"Hank Williams","2dyeCWctcFRt3Pha76ONgb",64,"country",0,"73ZTWCuwudUVvvWipRnQnQ","Family Tradition","1979",1970,0.66,0.523,0.794,32
+73,"Radiohead","4Z8W4fKeB5YxbusRsdQVPb",80,"rock",4,"70LcF31zb1H0PyJoS1Sx1r","Creep","1993-02-22",1990,0.515,0.43,0.104,42
+72,"AC/DC","711MCceyCBcFnzjGY4Q7Un",79,"rock",38,"2zYzyRzz6pRmhPzyfMEC8s","Highway to Hell","1979-07-27",1970,0.574,0.913,0.423,58.5
+71,"Frank Zappa","6ra4GIOgCZQZMOaUECftGN",55,"blues",0,"4PPwkLq2ld1k09Bl5NkyZB","Uncle Remus","1974-03-22",1970,0.484,0.66,0.742,27.5
+70,"The Police","5NGO30tJxFlKixkPSgXcFE",75,"rock",0,"1JSTJqkT5qHq8MDJnJbRE1","Every Breath You Take","1983-06-17",1980,0.82,0.452,0.74,37.5
+69,"Jackie Wilson","4VnomLtKTm9Ahe1tZfmZju",56,"soul",0,"5qyq1H5OPMlfuvZQ1wQNo7","(Your Love Keeps Lifting Me) Higher & Higher","1967",1960,0.634,0.677,0.939,28
+68,"The Temptations","3RwQ26hR2tJtA8F9p2n7jG",67,"soul",0,"745H5CctFr12Mo7cqa1BMH","My Girl","1965-03-22",1960,0.572,0.418,0.694,33.5
+67,"Cream","74oJ4qxwOZvX6oSsu1DGnw",62,"blues",0,"2K2M0TcglCRLLpFOzKeFZA","Sunshine Of Your Love","1967-11",1960,0.683,0.594,0.734,31
+66,"Al Green","3dkbV4qihUeMsqN4vBGg93",65,"soul",0,"63xdwScd1Ai1GigAwQxE8y","Let's Stay Together","1972",1970,0.756,0.401,0.514,32.5
+65,"The Kinks","1SQRv42e4PjEYfPhS0Tk9E",65,"folk",0,"6tZdL3Zp8JgrfDbsSeSV1S","You Really Got Me","1964-02-02",1960,0.567,0.959,0.961,32.5
+64,"Phil Spector","3jVMgT4X7YeuYE4aludcmE",34,"pop",0,"3jSoCdCbyZ2gMrQ9J3LA47","Silent Night","1963",1960,0.181,0.325,0.313,17
+63,"Tina Turner","1zuJe6b1roixEKMOtyrEak",68,"rock",1,"3ErsOxqe2RmXkR65wkygDz","What's Love Got to Do with It - 2015 Remaster","1984-05-29",1980,0.855,0.48,0.798,34.5
+62,"Joni Mitchell","5hW4L92KnC6dX9t7tYM4Ve",55,"folk",1,"0vItJLwvxJzu5PPw6o62A6","Our House - Demo","1970-03-11",1970,0.425,0.232,0.429,28
+61,"Metallica","2ye2Wgw4gimLv2eAKyk1NB",80,"rock",85,"3VqHuw0wFlIHcIPWkhIbdQ","Enter Sandman (Remastered)","1991-08-12",1990,0.566,0.834,0.621,82.5
+60,"The Sex Pistols","1u7kkVrr14iBvrpYnZILJR",53,"rock",0,"3LoDeIbiR12sAznmpNEmKA","Anarchy in the U.K.","1977-10-27",1970,0.323,0.978,0.168,26.5
+59,"Aerosmith","7Ey4PD4MYsKc5I2dolUwbH",74,"rock",1,"1xsYj84j7hUDDnTTerGWlH","Dream On","1973-01-05",1970,0.392,0.476,0.234,37.5
+58,"Parliament","5SMVzTJyKFJ7TUb46DglcH",49,"soul",0,"4XRkQloZFcRrCONN7ZQ49Y","Give Up The Funk (Tear The Roof Off The Sucker)","1975-12-15",1970,0.717,0.665,0.774,24.5
+57,"Grateful Dead","4TMHGUX5WI7OOm53PqSDAT",63,"rock",9,"5ZLzl6T8JwqMTMdoE0nCbU","Friend of the Devil","1970-06-01",1970,0.642,0.628,0.893,36
+56,"Dr. Dre","6DPYiyq5kWVQS4RGwxzPC7",78,"hip hop",5,"503OTo2dSqe7qk76rgsbep","Still D.R.E.","1999-11-16",1990,0.816,0.775,0.527,41.5
+55,"Eric Clapton","6PAt558ZEZl0DmdXlnjMgD",70,"blues",3,"6zC0mpGYwbNTpk9SKwh08f","Wonderful Tonight","1977-11-01",1970,0.572,0.214,0.485,36.5
+54,"Howlin’ Wolf","0Wxy5Qka8BN9crcFkiAxSR",50,"blues",0,"2HUZVffVPXvqnrml0gXggp","Smokestack Lightnin'","1958-03-01",1950,0.661,0.342,0.588,25
+53,"The Allman Brothers Band","4wQ3PyMz3WwJGI5uEqHUVR",61,"blues",0,"1hHGUdFaiJHw9hVZGJWYO2","Midnight Rider","1970-09-18",1970,0.585,0.532,0.68,30.5
+52,"Queen","1dfeR4HaWDbWqFHLkxsg1d",84,"rock",59,"3AymrUApW5JKKaNrHQhcBG","Thank God It's Christmas - 2011 Remaster","1984-02-27",1980,0.304,0.42,0.328,71.5
+51,"Pink Floyd","0k17h0D3J5VfsdmQ1iZtE9",78,"rock",25,"4gMgiXfqyzZLMhsksGmbQV","Another Brick in the Wall, Pt. 2","1979-11-30",1970,0.693,0.394,0.721,51.5
+50,"The Band","4vpDg7Y7fU982Ds30zawDA",59,"blues",0,"0P7DoyGrr4Wp9w5TotEtUC","The Weight - Remastered 2000","1968-07-01",1960,0.63,0.551,0.518,29.5
+49,"Elton John","3PhoLpVuITZKcymswpck5b",84,"rock",32,"3bH2Eu9A9ymI4UnGHRmoXg","Merry Christmas","2021-12-03",2020,0.594,0.935,0.602,58
+48,"Run-DMC","3CQIn7N5CuRDP8wEI7FiDA",65,"hip hop",0,"41onDks2UPbyjer5fMeUWf","Christmas In Hollis","1988-09-16",1980,0.819,0.702,0.573,32.5
+47,"Patti Smith","0vYkHhJ48Bs3jWcvZXvOrP",56,"rock",0,"0lIoY4ZQsdn5QzhraM9o9u","Because the Night","1978",1970,0.466,0.763,0.473,28
+46,"Janis Joplin","4NgfOZCL9Ml67xzM0xzIvC",61,"rock",0,"1IqFh00G2kvvMm8pRMpehA","Me and Bobby McGee","1971-01-11",1970,0.43,0.463,0.66,30.5
+45,"The Byrds","1PCZpxHJz7WAMF8EEq8bfc",54,"blues",0,"5qBqBdfTEIWJwAS0Jm2F5R","Turn! Turn! Turn! (To Everything There Is a Season)","1965-12-06",1960,0.451,0.818,0.755,27
+44,"Public Enemy","6Mo9PoU6svvhgEum7wh2Nd",54,"hip hop",0,"5YpZh8wfS4moRBk0ijNcXr","Harder Than You Think","2007-08-07",2000,0.484,0.852,0.766,27
+43,"Sly and the Family Stone","5m8H6zSadhu1j9Yi04VLqD",57,"soul",0,"2BydLQAh7CUIFvSEqAMc4x","If You Want Me to Stay","1973-06-30",1970,0.843,0.48,0.762,28.5
+42,"Van Morrison","44NX2ffIYHr6D4n7RaZF7A",70,"folk",1,"3yrSvpt2l1xhsV9Em88Pul","Brown Eyed Girl","1967-09",1960,0.491,0.583,0.908,35.5
+41,"The Doors","22WZ7M8sxp5THdruNY3gXt",71,"rock",0,"1Jmqubf9kGkWeYQXQKImL5","People Are Strange","1967-09-25",1960,0.699,0.467,0.764,35.5
+40,"Simon and Garfunkel","70cRZdQywnSFp9pnc2WTCE",70,"folk",0,"5y788ya4NvwhBznoDIcXwK","The Sound of Silence - Acoustic Version","1964-10-19",1960,0.525,0.216,0.328,35
+39,"David Bowie","0oSGxfWSnnOXhD2fKuz2Gy",76,"rock",4,"4okLKeB83VLZFGGtrMQxpd","Under Pressure","2002",2000,0.678,0.643,0.534,40
+38,"John Lennon","4x1nvY2FN8jxqAFA0DA02H",75,"rock",0,"27RYrbL6S02LNVhDWVl38b","Happy Xmas (War Is Over) - Remastered 2010","2010-10-05",2010,0.321,0.64,0.414,37.5
+37,"Roy Orbison","0JDkhL4rjiPNEp92jAgJnS",66,"folk",0,"48i055G1OT5KxGGftwFxWy","Oh, Pretty Woman","1962",1960,0.619,0.603,0.958,33
+36,"Madonna","6tbjWDEIzxoDsBA1FuhfPW",79,"pop",2,"6WzRpISELf3YglGAh7TXcG","Popular (with Playboi Carti & Madonna) - Music from the HBO Original Series","2023-06-02",2020,0.855,0.678,0.852,40.5
+35,"Michael Jackson","3fMbdgg4jU18AjLCKBhRSm",81,"soul",82,"7J1uxwnxfQLu4APicE5Rnj","Billie Jean","1982-11-30",1980,0.932,0.457,0.884,81.5
+34,"Neil Young","6v8FB84lnmJs434UJf2Mrm",59,"folk",2,"73uAQw29X3mrO1taWZaOvm","Journey Through the Past","2014-12-15",2010,0.523,0.305,0.435,30.5
+33,"The Everly Brothers","4ACplpEqD6JIVgKrafauzs",58,"folk",0,"2yTzXsYOrevaVIzQQgB3YL","All I Have To Do Is Dream","1957-01-01",1950,0.59,0.405,0.555,29
+32,"Smokey Robinson and the Miracles","6TKOZZDd5uV5KnyC5G4MUt",56,"soul",0,"6QyQmdvQ1ywNccYa0pwLNQ","The Tracks Of My Tears","1965-11-01",1960,0.502,0.333,0.729,28
+31,"Johnny Cash","6kACVPfCOnqzgfEF5ryl0x",73,"country",0,"28cnXtME493VX9NOw9cIUh","Hurt","2002-01-01",2000,0.534,0.392,0.163,36.5
+30,"Nirvana","6olE6TJLqED3rqDCT0FyPh",80,"rock",38,"5ghIJDpPoe3CfHMGu71E6T","Smells Like Teen Spirit","1991-09-26",1990,0.502,0.912,0.72,59
+29,"The Who","67ea9eGLXYMsO2eYQRui3w",66,"rock",1,"3qiyyUfYe7CRYLucrPmulD","Baba O'Riley","1971-08-14",1970,0.489,0.724,0.15,33.5
+28,"The Clash","3RGLhK1IP9jnYFH4BRFJBS",68,"rock",0,"39shmbIHICJ2Wxnk1fPSdz","Should I Stay or Should I Go - Remastered","1982",1980,0.743,0.836,0.82,34
+27,"Prince","5a2EaR3hamoenG9rDuVn8j",69,"rock",26,"62LJFaYihsdVrrkgUOJC05","Kiss","1986-03-31",1980,0.898,0.271,0.742,47.5
+26,"The Ramones","1co4F2pPNH8JjTutZkmgSm",65,"rock",0,"4KcH1ZRV2W1q7Flq0QqC76","Blitzkrieg Bop - 2016 Remaster","1976-04-23",1970,0.385,0.783,0.902,32.5
+25,"Fats Domino","09C0xjtosNAIXP36wTnWxd",52,"blues",0,"06PdA0DLgF4BfAeUNZAbFG","Blueberry Hill","1959-01-01",1950,0.489,0.499,0.829,26
+24,"Jerry Lee Lewis","2zyz0VJqrDXeFDIyrfVXSo",56,"rock",0,"64VP3skE86iTvdOlbzuIcO","Great Balls Of Fire","1961-12-01",1960,0.533,0.729,0.884,28
+23,"Bruce Springsteen","3eqjTLE0HfPfh78zjh6TqT",76,"rock",0,"6s2wpWPFPAgKg2LXxi1Oee","Santa Claus Is Comin' to Town - Live at C.W. Post College, Greenvale, NY - December 1975","1981",1980,0.357,0.668,0.407,38
+22,"U2","51Blml2LZPmy7TTiAg47vQ",77,"rock",2,"6ADSaE87h8Y3lccZlBJdXH","With Or Without You","1987-03-03",1980,0.54,0.429,0.113,39.5
+21,"Otis Redding","60df5JBRRPcnSpsIMxxwQm",71,"soul",0,"3zBhihYUHBmGd2bcQIobrF","(Sittin' On) the Dock of the Bay","1968",1960,0.769,0.367,0.535,35.5
+20,"Bo Diddley","2bmixwMZXlkl2sbIbOfviq",45,"blues",0,"760clbeDBWmBsBLbszWuNZ","I'm A Man","1958-01-01",1950,0.513,0.546,0.834,22.5
+19,"The Velvet Underground","1nJvji2KIlWSseXRSlNYsC",61,"rock",0,"11607FzqoipskTsXrwEHnJ","Sunday Morning","1967-03-12",1960,0.506,0.442,0.532,30.5
+18,"Marvin Gaye","3koiLjNrgRTNbOwViDipeA",73,"soul",1,"7tqhbajSfrz2F7E1Z75ASX","Ain't No Mountain High Enough","1967-08-29",1960,0.663,0.6,0.8,37
+17,"Muddy Waters","4y6J8jwRAwO4dssiSmN91R",54,"soul",0,"58PSYdY0GFg0LFb2PxYk4T","Mannish Boy","1977",1970,0.598,0.735,0.615,27
+16,"Sam Cooke","6hnWRPzGGKiapVX1UCdEAC",66,"soul",0,"7jVBSPLSbL1jKVBDMXlRCx","(What A) Wonderful World","2023-02-10",2020,0.588,0.561,0.943,33
+15,"Stevie Wonder","7guDJrEfX3qb6FEbdPA5qi",78,"soul",3,"5eK52eAjFLLBNhOUIuBnBe","What Christmas Means To Me","2004-09-21",2000,0.524,0.612,0.768,40.5
+14,"Led Zeppelin","36QJpDe2go2KgaRleHCDTp",75,"rock",27,"5CQ30WqJwcep0pYcV4AMNc","Stairway to Heaven - Remaster","1971-11-08",1970,0.338,0.34,0.197,51
+13,"Buddy Holly","3wYyutjgII8LJVVOLrGI0D",55,"folk",0,"39lnzOIUCSNaQmgBHoz7rt","Everyday","1958",1950,0.747,0.219,0.498,27.5
+12,"The Beach Boys","3oDbviiivRWhXwIE8hxkVV",75,"folk",6,"5xlS0QkVrSH7ssEbBgBzbM","Little Saint Nick - 1991 Remix","1964-11-09",1960,0.602,0.553,0.971,40.5
+11,"Bob Marley","2QsynagSdAqZj3U9HgDzjD",77,"reggae",0,"5O4erNlJ74PIF6kGol1ZrC","Could You Be Loved","1980",1980,0.916,0.72,0.76,38.5
+10,"Ray Charles","1eYhYunlNJlDoQhtYBvPsi",67,"soul",0,"5dUMh0ugelpKfoFp3qChuK","Hit the Road Jack","2021-09-10",2020,0.598,0.571,0.962,33.5
+9,"Aretha Franklin","7nwUJBm0HE4ZxD3f5cy5ok",70,"soul",2,"3NfxSdJnVdon1axzloJgba","I Say a Little Prayer","1968-06-14",1960,0.592,0.355,0.499,36
+8,"Little Richard","4xls23Ye9WR9yy3yYMpAMm",55,"soul",0,"2iXcvnD3d1gfLBum0cE5Eg","Tutti Frutti","1957-03",1950,0.555,0.658,0.937,27.5
+7,"James Brown","7GaxyUddsPok8BuhxN6OUW",63,"soul",0,"711ba03szQaASPznwdZkuw","I Got You - 1964 Smash Version","2014-07-29",2010,0.573,0.592,0.707,31.5
+6,"Jimi Hendrix","776Uo845nYHJpNaStv1Ds4",68,"rock",3,"2aoo2jlRnM3A0NyLQqMN2f","All Along the Watchtower","1968-10-25",1960,0.438,0.805,0.564,35.5
+5,"Chuck Berry","293zczrfYafIItmnmM3coR",72,"soul",4,"2pnPe4pJtq7689i5ydzvJJ","Run Rudolph Run","1986-01-01",1980,0.681,0.715,0.957,38
+4,"The Rolling Stones","22bE4uQ6baNwSHPVcDxLCe",78,"rock",6,"63T7DJ1AFDD6Bn8VzG6JE8","Paint It, Black","1966-04-15",1960,0.464,0.795,0.612,42
+3,"Elvis Presley","43ZHCT0cAZBISjO8DG9PnE",82,"rock",20,"3QiAAp20rPC3dcAtKtMaqQ","Blue Christmas","1957-10-15",1950,0.465,0.27,0.58,51
+2,"Bob Dylan","74ASZWbe4lXaubB36ztrGX",70,"folk",3,"6HSXNV0b4M4cLJ7ljgVVeh","Knockin' On Heaven's Door","1973-07-13",1970,0.513,0.396,0.229,36.5
+1,"The Beatles","3WrFJ7ztbogyGnTHbHJFl2",83,"rock",62,"6dGnYIeXmHdcikdzNNDMm2","Here Comes The Sun - Remastered 2009","1969-09-26",1960,0.557,0.54,0.394,72.5

@@ -1,0 +1,1829 @@
+---
+title: "Rolling Stone's 100 Greatest"
+subtitle: "Using Spotify and Billboard to measure the endurance of Rolling Stone's 100 Greatest Artists"
+output: 
+ html_document:
+---
+
+`Course code: MY472 Candidate number: 25710 Word count: 750`
+
+The **GitHub repository** for this project can be found [here](https://github.com/n-2935/enduring-music-project).
+
+## Introduction
+
+Released in 2010, the [Top 100 Greatest Artists](https://www.rollingstone.com/music/music-lists/100-greatest-artists-147446/) list represents what Rolling Stone magazine considers to be the best of the best when it comes to music.
+
+13 years later, this project analyses the ranked artists and their music to see how they stand in 2023. Are they still popular... or have they faded into obscurity? Are there any specific characteristics that seem to explain enduring engagement?
+
+**Research Question:**
+
+```{r research question, echo=FALSE}
+print("Rolling Stone Magazine ranked their 100 greatest musical artists of all time. At the end of 2023, how has their music endured? Are there any features or characteristics that seem to explain enduring engagement?")
+```
+
+**Approach:**
+
+As claimed by Matt Daniel in his project on "The most timeless songs of all-time", [*"Popularity on Spotify ... is a strong signal for whether a song will be remembered by our children's children."*](https://pudding.cool/2017/03/timeless/index.html)
+
+Taking this into account, this project uses Spotify's Artist Popularity, which is measured from the popularity of all the artist's tracks, as a proxy for enduring engagement with an artist's music.
+
+However, recognizing that there might be factors that affect current popularity but not endurance such as the [reappearance of songs in pop culture](https://www.today.com/popculture/music/stranger-things-running-up-that-hill-kate-bush-popularity-rcna31826), another proxy for endurance is used; the number of weeks an artist has been on the Billboard Artist 100 chart, which denotes historical popularity.
+
+Using these two factors - current and historical popularity - this project builds an endurance index which examines how enduring the Rolling Stone's 100 Greatest Artists and their music is in 2023.
+
+```{r endurance index formula, echo=FALSE}
+
+print("Artist Billboard Popularity = Normalized Weeks on Chart = (Weeks on Chart / Max Weeks on Chart (495)) * 100")
+print("Endurance Index = (Artist Spotify Popularity + Artist Billboard Popularity) / 2")
+```
+
+From this endurance index of the artists, the project then looks at the characteristics of the artists top track to see if there are any features that explain enduring engagement, such as genre, decade, or mood.
+
+## Data
+
+A summary of the data sources and variables collected is shown in Table 1 and the list of variables used in the final database is shown in Table 2.
+
+|                         Data Source | Access Method                  | Processing Method |                                    
+|:------------------------------------|:-------------------------------|:------------------|
+| Rolling Stone 100 Greatest rankings | Rolling Stone Magazine Website | Webscraping       |                                 
+|                             Spotify | Spotify Web API                | API calls         | 
+|                Billboard Artist 100 | Billboard Website              | Webscraping       |  
+: Table 1: Data Sources and Variables Collected
+
+|              Variable | Source                              | Explanation                                                    |
+|----------------------:|:------------------------------------|----------------------------------------------------------------|
+|           Artist Name | Rolling Stone 100 Greatest rankings |                                                                |
+| Rolling Stone Ranking | Rolling Stone 100 Greatest rankings |                                                                |
+|    Current Popularity | Spotify                             | Artist popularity on Spotify                                   |
+| Historical Popularity | Billboard                           | Weeks on Chart in Artists 100 Chart                            |
+| Endurance Index       | Billboard & Spotify                 |                                                                |
+|                 Genre | Spotify                             | Simplified genre of artist (eg. rock instead of southern rock) |
+|                 Track | Spotify                             | Top Track of each artist                                       |
+|                Decade | Spotify                             | Release Decade of Track                                        |
+|          Danceability | Spotify                             | Danceability score of Track                                    |
+|                Energy | Spotify                             | Energy score of Track                                          |
+|             Happiness | Spotify                             | Valence score of Track                                         |
+|                  Mood | Spotify                             | Average of danceability, energy and valence score              |
+
+: Table 2: Final Database Variables
+
+```{r rolling stone webscraping (artist name + ranking), echo=FALSE, eval=FALSE}
+
+# Scrape rolling stone website to get table with ranking and artist name
+library(RSelenium)
+
+rD <- rsDriver(browser = c("firefox"), verbose = FALSE, port = netstat::free_port(random = TRUE), chromever = NULL)
+driver <- rD$client
+
+url <- "https://www.rollingstone.com/music/music-lists/100-greatest-artists-147446/"
+driver$navigate(url)
+
+# Locate the reject button:
+reject_button <- driver$findElement(using = "xpath", 
+                                    value = '//*[@id="onetrust-reject-all-handler"]')
+# Click on the button:
+reject_button$clickElement()
+
+
+# Artists dataframe with two columns: Ranking and Artist_Name and 100 rows
+rolling_stone_artists_df <- data.frame(Ranking = numeric(100), Artist_Name = character(100), stringsAsFactors = FALSE)
+
+
+# Click the load more button
+load_more <- function(){
+  # Load more button
+  load_more_button <- driver$findElement(using = "xpath", 
+                                      value = '/html/body/div[5]/main/div[2]/div[1]/div/article/div[3]/div[2]/div[2]/a')
+  # Click on the button:
+  load_more_button$clickElement()
+}
+
+# Click the load previous button
+load_previous <- function(){
+  # Load previous button
+  load_previous_button <- driver$findElement(using = "xpath", 
+                                         value = '/html/body/div[5]/main/div[2]/div[1]/div/article/div[3]/div[2]/div[1]')
+  # Click on the button:
+  load_previous_button$clickElement()
+}
+
+
+# Get the artist rankings
+rank <- function(){
+  # Find all elements with the class name "c-gallery-vertical-album__number"
+  artist_rank <- driver$findElements(using = "class name", value = "c-gallery-vertical-album__number")
+  
+  # Extract text from each element
+  artist_ranks <- sapply(artist_rank, function(element) element$getElementText()[[1]])
+  
+  # Print or use the extracted information
+  return(artist_ranks)
+}
+
+
+# Get the artist names
+name <- function(){
+  # Find all elements with the class name "c-gallery-vertical-album__title"
+  artist_name <- driver$findElements(using = "class name", value = "c-gallery-vertical-album__title")
+  
+  # Extract text from each element
+  artist_names <- sapply(artist_name, function(element) element$getElementText()[[1]])
+  
+  # Print or use the extracted information
+  return(artist_names)
+}
+
+# Scrape all 
+scrape_artists <- function(){
+  # Assign values from the vector to the first 50 rows of the "Ranking" column in top_hundred_artists_df
+  rolling_stone_artists_df$Ranking[1:50] <- rank()
+  rolling_stone_artists_df$Artist_Name[1:50] <- name()
+
+  # Click the load more button
+  load_more()
+  Sys.sleep(2)
+
+  # Assign values from the vector to the last 50 rows of the "Ranking" column in top_hundred_artists_df
+  rolling_stone_artists_df$Ranking[51:100] <- rank()
+  rolling_stone_artists_df$Artist_Name[51:100] <- name()
+  
+  return(rolling_stone_artists_df)
+}
+
+# Call function to scrape all
+rolling_stone_artists_df <- scrape_artists()
+
+# Clean artists names by changing Parliament and Funkadelic to Parliament
+rolling_stone_artists_df$Artist_Name[rolling_stone_artists_df$Artist_Name == "Parliament and Funkadelic"] <- "Parliament"
+rolling_stone_artists_df
+
+# Close the RSelenium processes:
+driver$close()
+```
+
+```{r write rolling stone artists table to csv, echo=FALSE, eval=FALSE}
+
+# Getrolling stone artists dataframe to csv
+
+write.csv(rolling_stone_artists_df, "rolling_stone_artists_df.csv", row.names = FALSE)
+```
+
+```{r spotify key and authentication, echo=FALSE, eval=FALSE}
+# Access spotify API 
+readRenviron("spotify-api.env")
+
+# Get the client ID and secret (key) from the environment variables
+client_id <- Sys.getenv("SPOTIFY_CLIENT_ID")
+client_secret <-Sys.getenv("SPOTIFY_CLIENT_SECRET")
+
+# Authenticate with the API 
+library(httr)
+authentication <- POST(
+  'https://accounts.spotify.com/api/token',
+  accept_json(),
+  authenticate(client_id, client_secret),
+  body = list(grant_type = 'client_credentials'),
+  encode = 'form',
+  verbose()
+)
+mytoken = content(authentication)$access_token
+HeaderValue = paste0('Bearer ', mytoken)
+```
+
+```{r spotify popularity (+ spotify artists ID), echo=FALSE, eval=FALSE}
+# Get the artist id for each artist in the rolling_stone_artists_df data frame
+library(jsonlite)
+
+# Function to get the Spotify Artist ID for a given artist name
+get_artist_id <- function(artist_name) {
+  # Define the Spotify API endpoint for searching an artist
+  search_url <- 'https://api.spotify.com/v1/search'
+  
+  # Set up the request with the access token
+  search_response <- GET(
+    search_url,
+    query = list(q = artist_name, type = 'artist'),
+    add_headers(Authorization = HeaderValue)
+  )
+  
+  # Extract the artist ID from the response
+  search_results <- content(search_response)
+  
+  # Check if any results were returned
+  if (length(search_results$artists$items) > 0) {
+    artist_id <- search_results$artists$items[[1]]$id
+    return(artist_id)
+  } else {
+    # Return NA or any other value to indicate no match
+    return(NA)
+  }
+}
+
+# Create new dataframe based on rolling_stone_artists_df
+spotify_artists_df <- rolling_stone_artists_df
+
+# Apply the function to the entire "Artist_Name" column in the data frame
+spotify_artists_df$Spotify_Artist_ID <- sapply(spotify_artists_df$Artist_Name, get_artist_id)
+
+
+# Get the artist info for each artist in the top_hundred_artists data frame
+get_artist_info <- function(artist_id){
+  # Define the Spotify API endpoint for getting information about an artist
+  artist_url <- paste0('https://api.spotify.com/v1/artists/', artist_id)
+  
+  # Set up the request with the access token
+  artist_response <- GET(artist_url, add_headers(Authorization = HeaderValue))
+  
+  # Extract the artist information from the response
+  artist_info <- content(artist_response)
+  
+  popularity <- artist_info$popularity
+  
+  # Create a list with the extracted information
+  artist_data <- list(popularity = popularity)
+  
+  return(artist_data)
+}
+
+# Apply the function to the entire "Artist_Name" column in the data frame
+result <- lapply(spotify_artists_df$Spotify_Artist_ID, get_artist_info)
+
+# Extract individual elements
+spotify_artists_df$Spotify_Popularity <- sapply(result, function(x) x$popularity)
+
+spotify_artists_df
+```
+
+```{r spotify simplified genre, echo=FALSE, eval=FALSE}
+
+# add genre column
+get_artist_genre <- function(artist_id){
+  # Define the Spotify API endpoint for getting information about an artist
+  artist_url <- paste0('https://api.spotify.com/v1/artists/', artist_id)
+  
+  # Set up the request with the access token
+  artist_response <- GET(artist_url, add_headers(Authorization = HeaderValue))
+  
+  # Extract the artist information from the response
+  artist_info <- content(artist_response)
+  
+  genre <- artist_info$genres
+  
+  # Create a list with the extracted information
+  artist_data <- list(genre = genre)
+  
+  return(artist_data)
+}
+
+# Apply the function to the entire "Artist_Name" column in the data frame
+result <- lapply(spotify_artists_df$Spotify_Artist_ID, get_artist_genre)
+
+# Extract individual elements
+spotify_artists_df$Genre <- sapply(result, function(x) x$genre)
+
+spotify_artists_df$Genre <- sapply(spotify_artists_df$Genre, function(x) paste(x, collapse = ","))
+
+spotify_artists_df$Genre <- ifelse(grepl("reggae", spotify_artists_df$Genre), "reggae", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("soul", spotify_artists_df$Genre), "soul", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("blues", spotify_artists_df$Genre), "blues", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("folk", spotify_artists_df$Genre), "folk", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("country", spotify_artists_df$Genre), "country", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("hop", spotify_artists_df$Genre), "hip hop", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("pop", spotify_artists_df$Genre), "pop", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("rock", spotify_artists_df$Genre), "rock", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("punk", spotify_artists_df$Genre), "rock", spotify_artists_df$Genre)
+spotify_artists_df$Genre <- ifelse(grepl("motown", spotify_artists_df$Genre), "soul", spotify_artists_df$Genre)
+
+spotify_artists_df
+```
+
+```{r write spotify artist dataframe to csv, echo=FALSE, eval=FALSE}
+
+# Get spotify artist dataframe to csv
+
+write.csv(spotify_artists_df, "spotify_artists_df.csv", row.names = FALSE)
+```
+
+```{r billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+
+# Webscrape the billboard website to get weeks on chart for billboard artist 100
+
+get_rank <- function(artist) {
+  rD <- rsDriver(browser = c("firefox"), verbose = FALSE, port = netstat::free_port(random = TRUE), chromever = NULL)
+  driver <- rD$client
+
+  # artist should be all in lowercase and if there are spaces replace with a dash
+  
+  artist <- tolower(artist)
+  artist <- gsub(" ", "-", artist)
+  url <- paste0("https://www.billboard.com/artist/", artist, "/chart-history/ats/")
+  driver$navigate(url)
+  
+  # Locate the reject button:
+  reject_button <- driver$findElement(using = "xpath", 
+                                      value = '//*[@id="onetrust-reject-all-handler"]')
+  # Click on the button:
+  reject_button$clickElement()
+  
+  artist_rank <- driver$findElements(using = "css", value = ".artist-chart-row-week-on-chart")
+  
+  # if rank is not found, return NA
+  
+  if (length(artist_rank) == 0) {
+    return(NA)
+  }
+  
+  # if there are more than one number returned, return  NA
+  
+  if (length(artist_rank) > 1) {
+    return(NA)
+  }
+  
+  artist_rank <- sapply(artist_rank, function(x) {x$getElementText()})
+  
+  artist_rank <- as.numeric(artist_rank)
+  
+  return(artist_rank)
+  
+}
+```
+
+```{r block one billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+# Scrape in instalments of 10 to avoid being blocked
+billboard_list_one <- lapply(spotify_artists_df$Artist[1:10], get_rank)
+```
+
+```{r block two billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_two <- lapply(spotify_artists_df$Artist[11:20], get_rank)
+```
+
+```{r block three billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_three <- lapply(spotify_artists_df$Artist[21:30], get_rank)
+```
+
+```{r block four billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_four <- lapply(spotify_artists_df$Artist[31:40], get_rank)
+```
+
+```{r block five billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_five <- lapply(spotify_artists_df$Artist[41:50], get_rank)
+```
+
+```{r block six billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_six <- lapply(spotify_artists_df$Artist[51:60], get_rank)
+```
+
+```{r block seven billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_seven <- lapply(spotify_artists_df$Artist[61:70], get_rank)
+```
+
+```{r block eight billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_eight <- lapply(spotify_artists_df$Artist[71:80], get_rank)
+```
+
+```{r block nine billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_nine <- lapply(spotify_artists_df$Artist[81:90], get_rank)
+```
+
+```{r block ten billboard webscraping (billboard popularity), echo=FALSE, eval=FALSE}
+billboard_list_ten <- lapply(spotify_artists_df$Artist[91:100], get_rank)
+```
+
+```{r create billboard dataframe, echo=FALSE, eval=FALSE}
+# Join all the lists together
+billboard_list <- c(billboard_list_one, billboard_list_two, billboard_list_three, billboard_list_four, billboard_list_five, billboard_list_six, billboard_list_seven, billboard_list_eight, billboard_list_nine, billboard_list_ten)
+
+# Convert to a dataframe
+billboard_df <- data.frame(matrix(unlist(billboard_list), nrow=length(billboard_list), byrow=T))
+billboard_df
+```
+
+```{r add cleaned billboard data to table, echo=FALSE, eval=FALSE}
+
+# Create new table with billboard data
+billboard_artists_df <- spotify_artists_df
+
+# add list with weeks on chart to billboard_artists_df (and not billboard_df)
+billboard_artists_df$weeks_on_chart <- billboard_list
+
+# change weeks_on_chart to numeric
+billboard_artists_df$weeks_on_chart <- as.numeric(billboard_artists_df$weeks_on_chart)
+
+# where NA, replace with 0
+billboard_artists_df$weeks_on_chart[is.na(billboard_artists_df$weeks_on_chart)] <- 0
+
+# change so Smokey Robinson weeks_on_chart is 1, Simon & Garfunkel weeks_on_chart is 1, Tupac weeks_on_chart is 6 and AC/DC weeks_on_chart is 190 (as these artists name are different in the billboard charts)
+billboard_artists_df$weeks_on_chart[billboard_artists_df$Artist_Name == "Smokey Robinson and the Miracles"] <- 1
+
+billboard_artists_df$weeks_on_chart[billboard_artists_df$Artist_Name == "Simon and Garfunkel"] <- 1
+
+billboard_artists_df$weeks_on_chart[billboard_artists_df$Artist_Name == "Tupac Shakur"] <- 6
+
+billboard_artists_df$weeks_on_chart[billboard_artists_df$Artist_Name == "AC/DC"] <- 190
+
+# change so weeks on chart is called Billboard Popularity 
+colnames(billboard_artists_df)[colnames(billboard_artists_df) == "weeks_on_chart"] <- "Billboard_Popularity"
+
+# change Billboard Popularity so it is current Billboard Popularity / 495 * 100
+billboard_artists_df$Billboard_Popularity <- billboard_artists_df$Billboard_Popularity / 495 * 100
+
+# change so Billboard Popularity has no decimal places
+billboard_artists_df$Billboard_Popularity <- round(billboard_artists_df$Billboard_Popularity, 0)
+
+billboard_artists_df
+```
+
+```{r write billboard artist dataframe to csv, echo=FALSE, eval=FALSE}
+
+# Get billboard artist dataframe to csv
+
+write.csv(billboard_artists_df, "billboard_artists_df.csv", row.names = FALSE)
+```
+
+```{r spotify top track (track ID + track name + track release), echo=FALSE, eval=FALSE}
+
+# Create new table from spotify_artists_df 
+
+spotify_track_df <- billboard_artists_df
+
+# Get the artist top track for each artist in the spotify_artists_df data frame
+get_artist_top <- function(artist_id){
+  # Define the Spotify API endpoint for getting information about an artist
+  top_url <- paste0('https://api.spotify.com/v1/artists/', artist_id , '/top-tracks?market=US')
+  
+  # Set up the request with the access token
+  top_response <- GET(top_url, add_headers(Authorization = HeaderValue))
+  
+  # Extract the artist information from the response
+  top_info <- content(top_response)
+  
+  track_id <- top_info$tracks[[1]]$id
+  track_name <- top_info$tracks[[1]]$name
+  track_release <- top_info$tracks[[1]]$album$release_date
+
+  
+  # Create a list with the extracted information
+  artist_data <- list(track_id = track_id, track_name = track_name, track_release = track_release)
+  
+  return(artist_data)
+}
+
+# Apply the function to the entire "Artist_Name" column in the data frame
+result <- lapply(spotify_track_df$Spotify_Artist_ID, get_artist_top)
+
+# Extract individual elements
+spotify_track_df$track_id <- sapply(result, function(x) x$track_id)
+spotify_track_df$track_name <- sapply(result, function(x) x$track_name)
+spotify_track_df$track_release <- sapply(result, function(x) x$track_release)
+
+
+spotify_track_df
+```
+
+```{r convert track release to decade, echo=FALSE, eval=FALSE}
+
+# Create new column called decade which derives only year from track_release
+
+spotify_track_df$decade <- substr(spotify_track_df$track_release, 1, 4)
+
+# change decade to numeric
+
+spotify_track_df$decade <- as.numeric(spotify_track_df$decade)
+
+# simplify decade (eg. if decade is between 1960 and 1969 then 1960)
+
+spotify_track_df$decade[spotify_track_df$decade >= 1950 & spotify_track_df$decade <= 1959] <- 1950
+
+spotify_track_df$decade[spotify_track_df$decade >= 1960 & spotify_track_df$decade <= 1969] <- 1960
+
+spotify_track_df$decade[spotify_track_df$decade >= 1970 & spotify_track_df$decade <= 1979] <- 1970
+
+spotify_track_df$decade[spotify_track_df$decade >= 1980 & spotify_track_df$decade <= 1989] <- 1980
+
+spotify_track_df$decade[spotify_track_df$decade >= 1990 & spotify_track_df$decade <= 1999] <- 1990
+
+spotify_track_df$decade[spotify_track_df$decade >= 2000 & spotify_track_df$decade <= 2009] <- 2000
+
+spotify_track_df$decade[spotify_track_df$decade >= 2010 & spotify_track_df$decade <= 2019] <- 2010
+
+spotify_track_df$decade[spotify_track_df$decade >= 2020 & spotify_track_df$decade <= 2029] <- 2020
+
+spotify_track_df
+
+```
+
+```{r write spotify top track dataframe to csv, echo=FALSE, eval=FALSE}
+
+# Get top track dataframe to csv
+write.csv(spotify_track_df, "spotify_track_df.csv", row.names = FALSE)
+```
+
+```{r spotify audio features of top track (danceability + energy + happiness), echo=FALSE, eval=FALSE}
+# Create new table from spotify_track_df
+
+spotify_audio_df <- spotify_track_df
+
+# Get audio features for each track 
+
+# Get the artist top track audio features 
+get_audio <- function(track_id){
+  # Define the Spotify API endpoint for getting information about an artist
+  audio_url <- paste0('https://api.spotify.com/v1/audio-features/', track_id)
+  
+  # Set up the request with the access token
+  audio_response <- GET(audio_url, add_headers(Authorization = HeaderValue))
+  
+  # Extract the artist information from the response
+  audio_info <- content(audio_response)
+  
+  track_danceability <- audio_info$danceability
+  track_energy <- audio_info$energy
+  track_valence <- audio_info$valence
+  
+  # Create a list with the extracted information
+  audio_data <- list(track_id = track_id,
+                     track_danceability = track_danceability,
+                     track_energy = track_energy, 
+                     track_valence = track_valence)
+  
+  return(audio_data)
+}
+
+# Apply the function to the entire "Artist_Name" column in the data frame
+result <- lapply(spotify_audio_df$track_id, get_audio)
+
+# Extract individual elements
+spotify_audio_df$track_danceability <- sapply(result, function(x) x$track_danceability)
+spotify_audio_df$track_energy <- sapply(result, function(x) x$track_energy)
+spotify_audio_df$track_valence <- sapply(result, function(x) x$track_valence)
+
+# change name to Danceability, Energy, Valence
+colnames(spotify_audio_df)[colnames(spotify_audio_df) == "track_danceability"] <- "Danceability"
+colnames(spotify_audio_df)[colnames(spotify_audio_df) == "track_energy"] <- "Energy"
+colnames(spotify_audio_df)[colnames(spotify_audio_df) == "track_valence"] <- "Valence"
+
+spotify_audio_df
+```
+
+```{r write spotify audio dataframe to csv, echo=FALSE, eval=FALSE}
+
+# Get spotify audio dataframe to csv
+write.csv(spotify_audio_df, "spotify_audio_df.csv", row.names = FALSE)
+```
+
+```{r final table (endurance index), echo=FALSE, eval=FALSE}
+# add endurance index to spotify_audio_df
+spotify_audio_df$Endurance_Index <- (spotify_audio_df$Spotify_Popularity + spotify_audio_df$Billboard_Popularity) / 2
+
+final_df <- spotify_audio_df
+```
+
+```{r write  final dataframe to csv, echo=FALSE, eval=FALSE}
+# Write  final dataframe to csv
+write.csv(final_df, "final_df.csv", row.names = FALSE)
+```
+
+### Rolling Stone's 100 Greatest Artists Playlist
+
+```{r Import final dataframe from csv, include = FALSE}
+# Import final_df.csv
+
+final_df <- read.csv("final_df.csv", header = TRUE)
+
+```
+
+```{r dataframe created for spotify playlist, include = FALSE}
+# Create table from final_df which only contains ranking, artist name, spotify popularity, billboard popularity and endurance index
+
+playlist_table <- final_df[,c(1,2,4,6,14)]
+
+```
+
+```{r Spotify Rolling Stone 100 Greatest Playlist (Artist Name,Spotify Popularity,Billboard Popularity and Endurance Index), echo = FALSE}
+# write spotify theme for chart which can be found in reactable documentation
+
+library(reactable)
+library(htmltools)
+
+spotify_theme <- function() {
+  search_icon <- function(fill = "none") {
+    # Icon from https://boxicons.com
+    svg <- sprintf('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="%s" d="M10 18c1.85 0 3.54-.64 4.9-1.69l4.4 4.4 1.4-1.42-4.39-4.4A8 8 0 102 10a8 8 0 008 8.01zm0-14a6 6 0 11-.01 12.01A6 6 0 0110 4z"/></svg>', fill)
+    sprintf("url('data:image/svg+xml;charset=utf-8,%s')", URLencode(svg))
+  }
+
+  text_color <- "hsl(0, 0%, 95%)"
+  text_color_light <- "hsl(0, 0%, 70%)"
+  text_color_lighter <- "hsl(0, 0%, 55%)"
+  bg_color <- "hsl(0, 0%, 10%)"
+
+  reactableTheme(
+    color = text_color,
+    backgroundColor = bg_color,
+    borderColor = "hsl(0, 0%, 16%)",
+    borderWidth = "1px",
+    highlightColor = "rgba(255, 255, 255, 0.1)",
+    cellPadding = "10px 8px",
+    style = list(
+      fontFamily = "Work Sans, Helvetica Neue, Helvetica, Arial, sans-serif",
+      fontSize = "0.875rem",
+      "a" = list(
+        color = text_color,
+        textDecoration = "none",
+        "&:hover, &:focus" = list(
+          textDecoration = "underline",
+          textDecorationThickness = "1px"
+        )
+      ),
+      ".number" = list(
+        color = text_color_light,
+        fontFamily = "Source Code Pro, Consolas, Monaco, monospace"
+      ),
+      ".tag" = list(
+        padding = "0.125rem 0.25rem",
+        color = "hsl(0, 0%, 40%)",
+        fontSize = "0.75rem",
+        border = "1px solid hsl(0, 0%, 24%)",
+        borderRadius = "2px",
+        textTransform = "uppercase"
+      )
+    ),
+    headerStyle = list(
+      color = text_color_light,
+      fontWeight = 400,
+      fontSize = "0.75rem",
+      letterSpacing = "1px",
+      textTransform = "uppercase",
+      "&:hover, &:focus" = list(color = text_color)
+    ),
+    rowHighlightStyle = list(
+      ".tag" = list(color = text_color, borderColor = text_color_lighter)
+    ),
+    # Full-width search bar with search icon
+    searchInputStyle = list(
+      paddingLeft = "1.9rem",
+      paddingTop = "0.5rem",
+      paddingBottom = "0.5rem",
+      width = "100%",
+      border = "none",
+      backgroundColor = bg_color,
+      backgroundImage = search_icon(text_color_light),
+      backgroundSize = "1rem",
+      backgroundPosition = "left 0.5rem center",
+      backgroundRepeat = "no-repeat",
+      "&:focus" = list(backgroundColor = "rgba(255, 255, 255, 0.1)", border = "none"),
+      "&:hover, &:focus" = list(backgroundImage = search_icon(text_color)),
+      "::placeholder" = list(color = text_color_lighter),
+      "&:hover::placeholder, &:focus::placeholder" = list(color = text_color)
+    ),
+    paginationStyle = list(color = text_color_light),
+    pageButtonHoverStyle = list(backgroundColor = "hsl(0, 0%, 20%)"),
+    pageButtonActiveStyle = list(backgroundColor = "hsl(0, 0%, 24%)")
+  )
+}
+
+# Function to create the chart 
+
+rolling_stone_chart <- function(data) {
+  reactable(
+    data,
+    theme = spotify_theme(),
+    searchable = TRUE,
+    defaultColDef = colDef(
+      minWidth = 100,
+      headerStyle = list(fontWeight = "bold")
+    ),
+    columns = list(
+      Ranking = colDef(
+        name = "#",
+        align = "center",
+        style = list(fontWeight = "bold")
+      ),
+      Artist_Name = colDef(
+        name = "Artist",
+        minWidth = 200,
+        maxWidth = 400,
+      ),
+      Spotify_Popularity = colDef(
+        name = "Spotify Popularity",
+        align = "center",
+        class = "number",
+        style = list(fontWeight = "bold")
+      ),
+      Billboard_Popularity = colDef(
+        name = "Billboard Popularity",
+        align = "center",
+        class = "number",
+        style = list(fontWeight = "bold")
+      ),
+      Endurance_Index = colDef(
+        name = "Endurance Index",
+        align = "center",
+        class = "number",
+        style = list(fontWeight = "bold")
+      )
+    )
+  )
+}
+
+div(
+  rolling_stone_chart(playlist_table)
+)
+```
+
+## Analysis
+
+### Ranking {.tabset}
+
+Figure 1 shows that Rolling Stone’s 100 greatest artists, at the end of 2023, seem to have endured with an above average current popularity of 66 and 90% of artists with a score above 50. However, Figures 2-3, which account for historical popularity, demonstrate that if we look at the popularity of these artists from 2014 (inception of Artist 100 Billboard chart) to now, the 100 greatest do not appear to stand the test of time as the average endurance index is  37 and  56% of artists having an historical popularity score of 0. 
+
+When looking at ranking as a potential determinant of endurance, the relationship between all endurance variables is negligible (below ± 0.199 correlation) suggesting ranking does not explain endurance. 
+
+#### Current Popularity
+
+```{r set figure size, echo = FALSE, warning= FALSE, message = FALSE}
+#set all figures as 9 by 6 inches
+knitr::opts_chunk$set(fig.width=9, fig.height=6) 
+```
+
+```{r Figure 1: Current Popularity vs Rolling Stone Ranking, echo = FALSE, warning= FALSE, message = FALSE}
+library(plotly)
+
+# Create figure one using plotly
+
+# find mean current popularity
+mean_current_popularity <- mean(final_df$Spotify_Popularity)
+
+
+fig_one <- plot_ly(
+  final_df, x = ~Spotify_Popularity, y = ~Ranking,
+  color = ~Spotify_Popularity, size = ~Ranking, text = ~paste("Artist: ", Artist_Name, "<br>Ranking: ", Ranking, "<br>Current Popularity: ", Spotify_Popularity)
+) %>%
+  layout(
+    title = '<b>Figure 1: Current Popularity vs Rolling Stone Ranking<b>',
+    xaxis = list(title = "Current Popularity (Spotify)"),
+    yaxis = list(title = "Rolling Stone Ranking"),
+    shapes = list(
+      list(
+        type = "line",
+        x0 = 0,
+        y0 = 50,
+        x1 = 100,
+        y1 = 50,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = 50,
+        y0 = 0,
+        x1 = 50,
+        y1 = 100,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = mean_current_popularity,
+        y0 = 0,
+        x1 = mean_current_popularity,
+        y1 = 100,
+        line = list(color = "#e7a4b6", width = 2)
+      )
+    )
+  )
+
+# add label at ranking = 51 and popularity = 1 as "Least Enduring", label at ranking = 1 and popularity = 100 as "Most Enduring", and label at ranking = 99 and popularity = 51 as "Highest Ranking" and label at ranking = 1 and popularity = 51 as "Lowest Ranking"
+
+fig_one <- fig_one %>% layout(annotations = list(
+  list(
+    x = 92,
+    y = 52,
+    xref = "x",
+    yref = "y",
+    text = "Most Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 10,
+    y = 52,
+    xref = "x",
+    yref = "y",
+    text = "Least Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = -40,
+    ay = 0
+  ),
+  list(
+    x = 51,
+    y = 102,
+    xref = "x",
+    yref = "y",
+    text = "Highest Ranking",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 51,
+    y = -2,
+    xref = "x",
+    yref = "y",
+    text = "Lowest Ranking",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  ),
+  list(
+    x = mean_current_popularity,
+    y = -2,
+    xref = "x",
+    yref = "y",
+    text = "66",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+# add correlation coefficient to figure
+
+correlation_coefficient_one <- cor(final_df$Ranking, final_df$Spotify_Popularity)
+
+
+fig_one <- fig_one %>% layout(annotations = list(
+  list(
+    x = 90,
+    y = 102,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_one, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+fig_one
+```
+
+#### Historical Popularity
+
+```{r Figure 2: Historical Popularity vs Rolling Stone Ranking, echo = FALSE, warning= FALSE, message = FALSE}
+
+# find mean historical popularity
+mean_historical_popularity <- mean(final_df$Billboard_Popularity)
+
+fig_two <- plot_ly(
+  final_df, x = ~Billboard_Popularity, y = ~Ranking,
+  color = ~Billboard_Popularity, size = ~Ranking, text = ~paste("Artist: ", Artist_Name, "<br>Ranking: ", Ranking, "<br>Historical Popularity: ", Billboard_Popularity)
+) %>%
+  layout(
+    title = '<b>Figure 2: Historical Popularity vs Rolling Stone Ranking<b>',
+    xaxis = list(title = "Historical Popularity (Billboard)"),
+    yaxis = list(title = "Rolling Stone Ranking"),
+    shapes = list(
+      list(
+        type = "line",
+        x0 = 0,
+        y0 = 50,
+        x1 = 100,
+        y1 = 50,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = 50,
+        y0 = 0,
+        x1 = 50,
+        y1 = 100,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = mean_historical_popularity,
+        y0 = 0,
+        x1 = mean_historical_popularity,
+        y1 = 100,
+        line = list(color = "#e7a4b6", width = 2)
+      )
+    )
+  )
+
+# add label at ranking = 51 and popularity = 1 as "Least Enduring", label at ranking = 1 and popularity = 100 as "Most Enduring", and label at ranking = 99 and popularity = 51 as "Highest Ranking" and label at ranking = 1 and popularity = 51 as "Lowest Ranking"
+
+fig_two <- fig_two %>% layout(annotations = list(
+  list(
+    x = 92,
+    y = 52,
+    xref = "x",
+    yref = "y",
+    text = "Most Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 10,
+    y = 52,
+    xref = "x",
+    yref = "y",
+    text = "Least Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = -40,
+    ay = 0
+  ),
+  list(
+    x = 51,
+    y = 102,
+    xref = "x",
+    yref = "y",
+    text = "Highest Ranking",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 51,
+    y = -2,
+    xref = "x",
+    yref = "y",
+    text = "Lowest Ranking",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  ),
+  list(
+    x = mean_historical_popularity,
+    y = -2,
+    xref = "x",
+    yref = "y",
+    text = "8",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+# add correlation coefficient to figure
+
+correlation_coefficient_two <- cor(final_df$Ranking, final_df$Billboard_Popularity)
+
+
+fig_two <- fig_two %>% layout(annotations = list(
+  list(
+    x = 90,
+    y = 102,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_two, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+
+fig_two
+```
+
+#### Endurance Index
+
+```{r Figure 3: Endurance Index vs Rolling Stone Ranking, echo = FALSE, warning= FALSE, message = FALSE}
+
+# find mean endurance index
+mean_endurance_index <- mean(final_df$Endurance_Index)
+
+fig_three <- plot_ly(
+  final_df, x = ~Endurance_Index, y = ~Ranking,
+  color = ~Endurance_Index, size = ~Ranking, text = ~paste("Artist: ", Artist_Name, "<br>Ranking: ", Ranking, "<br>Endurance Index: ", Endurance_Index)
+) %>%
+  layout(
+    title = '<b>Figure 3: Endurance Index vs Rolling Stone Ranking<b>',
+    xaxis = list(title = "Endurance Index (Spotify & Billboard)"),
+    yaxis = list(title = "Rolling Stone Ranking"),
+    shapes = list(
+      list(
+        type = "line",
+        x0 = 0,
+        y0 = 50,
+        x1 = 100,
+        y1 = 50,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = 50,
+        y0 = 0,
+        x1 = 50,
+        y1 = 100,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = mean_endurance_index,
+        y0 = 0,
+        x1 = mean_endurance_index,
+        y1 = 100,
+        line = list(color = "#e7a4b6", width = 2)
+      )
+    )
+  )
+
+# add label at ranking = 51 and popularity = 1 as "Least Enduring", label at ranking = 1 and popularity = 100 as "Most Enduring", and label at ranking = 99 and popularity = 51 as "Highest Ranking" and label at ranking = 1 and popularity = 51 as "Lowest Ranking"
+
+fig_three <- fig_three %>% layout(annotations = list(
+  list(
+    x = 92,
+    y = 52,
+    xref = "x",
+    yref = "y",
+    text = "Most Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 10,
+    y = 52,
+    xref = "x",
+    yref = "y",
+    text = "Least Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = -40,
+    ay = 0
+  ),
+  list(
+    x = 51,
+    y = 102,
+    xref = "x",
+    yref = "y",
+    text = "Highest Ranking",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 51,
+    y = -2,
+    xref = "x",
+    yref = "y",
+    text = "Lowest Ranking",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  ),
+    list(
+    x = mean_endurance_index,
+    y = -2,
+    xref = "x",
+    yref = "y",
+    text = "37",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+# add correlation coefficient to figure
+
+correlation_coefficient_three <- cor(final_df$Ranking, final_df$Endurance_Index)
+
+
+fig_three <- fig_three %>% layout(annotations = list(
+  list(
+    x = 90,
+    y = 102,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_three, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+
+fig_three
+```
+
+
+### Characteristics of Enduring Artists: Genre, Decade and Mood {.tabset}
+
+#### Genre
+
+Hip hop appears to be the most enduring genre and pop the least. However, this analysis cannot answer the question of whether music of certain genres is more enduring due to a limited and skewed sample (e.g. reggae has only one artist and rock artists account for 40% of artists). 
+
+```{r Figure 4: Endurance Index vs Genre, echo = FALSE, warning= FALSE, message = FALSE}
+
+# Create table with plotly which shows the relationship between genre and endurance index
+
+# find mean endurance index for each genre
+genre_endurance_index <- final_df %>%
+  group_by(Genre) %>%
+  summarise(Endurance_Index = mean(Endurance_Index))
+
+# round endurance index to 0 decimal places
+genre_endurance_index$Endurance_Index <- round(genre_endurance_index$Endurance_Index, 0)
+
+fig_four <- plot_ly(
+  genre_endurance_index, x = ~Genre, y = ~Endurance_Index,
+  color = ~Genre, size = ~Endurance_Index, mode = "markers", type = "bar", text = ~paste("Genre: ", Genre, "<br>Endurance Index: ", Endurance_Index)
+) %>%
+  layout(
+    title = '<b>Figure 4: Endurance Index vs Genre<b>',
+    xaxis = list(title = "Genre"),
+    yaxis = list(title = "Mean Endurance Index (Spotify & Billboard)")
+  )
+
+# add line at mean endurance index and there where y is approximately 37
+
+fig_four <- fig_four %>% layout(shapes = list(
+  list(
+    type = "line",
+    x0 = -0.5,
+    y0 = 37,
+    x1 = 7.5,
+    y1 = 37,
+    line = list(color = "#e7a4b6", width = 2)
+  )
+))
+
+# add label saying 37 at y = 37
+
+fig_four <- fig_four %>% layout(annotations = list(
+  list(
+    x = -0.7,
+    y = 37,
+    xref = "x",
+    yref = "y",
+    text = "37",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+fig_four
+```
+
+#### Decade
+
+The most enduring decades appear to be the 90s, the 80s and the 2000s and there is a weak positive correlation between decade and endurance which suggests the more recent the music the more enduring. However, it must be noted the data is skewed with 65% of the music being from the 1960s-1980s and that this analysis is only performed to the top track of the artists. 
+
+```{r Figure 5 : Endurance Index vs Decade, echo = FALSE, warning= FALSE, message = FALSE}
+# Create table using plotly which shows the relationship between decade and endurance index
+
+# find mean endurance index for each genre
+decade_endurance_index <- final_df %>%
+  group_by(decade) %>%
+  summarise(Endurance_Index = mean(Endurance_Index))
+
+# round endurance index to 0 decimal places
+decade_endurance_index$Endurance_Index <- round(decade_endurance_index$Endurance_Index, 0)
+
+fig_five <- plot_ly(
+  decade_endurance_index, x = ~decade, y = ~Endurance_Index,
+  color = ~decade, size = ~Endurance_Index, mode = "markers", type = "bar"
+) %>%
+  layout(
+    title = '<b>Figure 5: Endurance Index vs Decade<b>',
+    xaxis = list(title = "Decade"),
+    yaxis = list(title = "Mean Endurance Index (Spotify & Billboard)")
+  )
+
+# add line at mean endurance index and there where y is approximately 37
+
+fig_five <- fig_five %>% layout(shapes = list(
+  list(
+    type = "line",
+    x0 = 1945,
+    y0 = 37,
+    x1 = 2025,
+    y1 = 37,
+    line = list(color = "#e7a4b6", width = 2)
+  )
+))
+
+# add to graph correlation coefficient between decade and endurance index
+
+correlation_coefficient_five <- cor(final_df$decade, final_df$Endurance_Index)
+
+fig_five <- fig_five %>% layout(annotations = list(
+  list(
+    x = 2020,
+    y = 46,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_five, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+fig_five
+```
+
+#### Mood Analysis {.tabset} 
+
+The mood analysis shows that the relationship between energy, happiness and overall mood and endurance is negligible as seen by Figures 7-9 and the correlation coefficient. Danceability, on the other hand, appears to have a weak positive correlation with endurance suggesting danceable music may be more enduring.
+
+##### Danceability
+
+```{r Figure 6 : Endurance Index vs Danceability, echo = FALSE, warning= FALSE, message = FALSE}
+
+# Create table using plotly which shows the relationship between danceability and endurance index
+
+fig_six <- plot_ly(
+  final_df, x = ~Endurance_Index, y = ~Danceability,
+  color = ~Endurance_Index, size = ~Danceability, text = ~paste("Artist: ", Artist_Name, "Track: ", track_name, "<br>Ranking: ", Ranking, "<br>Endurance Index: ", Endurance_Index, "<br>Danceability: ", Danceability)
+) %>%
+  layout(
+    title = '<b>Figure 6 : Endurance Index vs Danceability<b>',
+    xaxis = list(title = "Endurance Index (Spotify & Billboard)"),
+    yaxis = list(title = "Danceability (Spotify)"),
+    shapes = list(
+      list(
+        type = "line",
+        x0 = 0,
+        y0 = 0.5,
+        x1 = 100,
+        y1 = 0.5,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = 50,
+        y0 = 0,
+        x1 = 50,
+        y1 = 1,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = mean_endurance_index,
+        y0 = 0,
+        x1 = mean_endurance_index,
+        y1 = 1,
+        line = list(color = "#e7a4b6", width = 2)
+      )
+    )
+  )
+
+# add label at ranking = 51 and popularity = 1 as "Least Enduring", label at ranking = 1 and popularity = 100 as "Most Enduring", and label at ranking = 99 and popularity = 51 as "Most Danceable" and label at ranking = 1 and popularity = 51 as "Least Danceable"
+
+fig_six <- fig_six %>% layout(annotations = list(
+  list(
+    x = 92,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Most Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 10,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Least Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = -40,
+    ay = 0
+  ),
+  list(
+    x = 51,
+    y = 1.02,
+    xref = "x",
+    yref = "y",
+    text = "Most Danceable",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 51,
+    y = -0.02,
+    xref = "x",
+    yref = "y",
+    text = "Least Danceable",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  ),
+      list(
+    x = mean_endurance_index,
+    y = -0.02,
+    xref = "x",
+    yref = "y",
+    text = "37",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+# add correlation coefficient to figure
+
+correlation_coefficient_six <- cor(final_df$Danceability, final_df$Endurance_Index)
+
+
+fig_six <- fig_six %>% layout(annotations = list(
+  list(
+    x = 90,
+    y = 1.02,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_six, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+# add line at mean endurance index
+
+
+fig_six <- fig_six %>% layout(shapes = list(
+  list(
+    type = "line",
+    x0 = mean_endurance_index,
+    y0 = 0,
+    x1 = mean_endurance_index,
+    y1 = 1,
+    line = list(color = "grey", width = 2)
+  )
+))
+
+fig_six
+```
+
+##### Energy
+
+```{r Figure 7 : Endurance Index vs Energy, echo = FALSE, warning= FALSE, message = FALSE}
+
+# Create table using plotly which shows the relationship between energy and endurance index
+
+fig_seven <- plot_ly(
+  final_df, x = ~Endurance_Index, y = ~Energy,
+  color = ~Endurance_Index, size = ~Energy, text = ~paste("Artist: ", Artist_Name, "Track: ", track_name, "<br>Ranking: ", Ranking, "<br>Endurance Index: ", Endurance_Index, "<br>Energy: ", Energy)
+) %>%
+  layout(
+    title = '<b>Figure 7 : Endurance Index vs Energy<b>',
+    xaxis = list(title = "Endurance Index (Spotify & Billboard)"),
+    yaxis = list(title = "Energy (Spotify)"),
+    shapes = list(
+      list(
+        type = "line",
+        x0 = 0,
+        y0 = 0.50,
+        x1 = 100,
+        y1 = 0.50,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = 50,
+        y0 = 0,
+        x1 = 50,
+        y1 = 1,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = mean_endurance_index,
+        y0 = 0,
+        x1 = mean_endurance_index,
+        y1 = 1,
+        line = list(color = "#e7a4b6", width = 2)
+      )
+    )
+  )
+
+# add label at ranking = 51 and popularity = 1 as "Least Enduring", label at ranking = 1 and popularity = 100 as "Most Enduring", and label at ranking = 99 and popularity = 51 as "High Energy" and label at ranking = 1 and popularity = 51 as "Low Energy"
+
+fig_seven <- fig_seven %>% layout(annotations = list(
+  list(
+    x = 92,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Most Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 10,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Least Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = -40,
+    ay = 0
+  ),
+  list(
+    x = 51,
+    y = 1.02,
+    xref = "x",
+    yref = "y",
+    text = "High Energy",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 51,
+    y = -0.02,
+    xref = "x",
+    yref = "y",
+    text = "Low Energy",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  ),
+  list(
+    x = mean_endurance_index,
+    y = -0.02,
+    xref = "x",
+    yref = "y",
+    text = "37",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = mean_endurance_index,
+    y = -0.02,
+    xref = "x",
+    yref = "y",
+    text = "37",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+# add correlation coefficient to figure
+
+correlation_coefficient_seven <- cor(final_df$Energy, final_df$Endurance_Index)
+
+
+fig_seven <- fig_seven %>% layout(annotations = list(
+  list(
+    x = 90,
+    y = 1.02,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_seven, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+# add line at mean endurance index
+
+fig_seven <- fig_seven %>% layout(shapes = list(
+  list(
+    type = "line",
+    x0 = mean_endurance_index,
+    y0 = 0,
+    x1 = mean_endurance_index,
+    y1 = 1,
+    line = list(color = "grey", width = 2)
+  )
+))
+
+fig_seven
+
+```
+
+##### Happiness
+
+```{r Figure 8 : Endurance Index vs Happiness, echo = FALSE, warning= FALSE, message = FALSE}
+# Create table using plotly which shows the relationship between happiness (valence) and endurance index
+
+fig_eight <- plot_ly(
+  final_df, x = ~Endurance_Index, y = ~Valence,
+  color = ~Endurance_Index, size = ~Valence, text = ~paste("Artist: ", Artist_Name, "Track: ", track_name, "<br>Ranking: ", Ranking, "<br>Endurance Index: ", Endurance_Index, "<br>Happiness: ", Valence)
+) %>%
+  layout(
+    title = '<b>Figure 8 : Endurance Index vs Happiness<b>',
+    xaxis = list(title = "Endurance Index (Spotify & Billboard)"),
+    yaxis = list(title = "Happiness (Valence - Spotify)"),
+    shapes = list(
+      list(
+        type = "line",
+        x0 = 0,
+        y0 = 0.50,
+        x1 = 100,
+        y1 = 0.50,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = 50,
+        y0 = 0,
+        x1 = 50,
+        y1 = 1,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = mean_endurance_index,
+        y0 = 0,
+        x1 = mean_endurance_index,
+        y1 = 1,
+        line = list(color = "#e7a4b6", width = 2)
+      )
+    )
+  )
+
+# add label at ranking = 51 and popularity = 1 as "Least Enduring", label at ranking = 1 and popularity = 100 as "Most Enduring", and label at ranking = 99 and popularity = 51 as "Happier" and label at ranking = 1 and popularity = 51 as "Sadder"
+
+fig_eight <- fig_eight %>% layout(annotations = list(
+  list(
+    x = 92,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Most Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 10,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Least Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = -40,
+    ay = 0
+  ),
+  list(
+    x = 51,
+    y = 1.02,
+    xref = "x",
+    yref = "y",
+    text = "Happier",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 51,
+    y = -0.02,
+    xref = "x",
+    yref = "y",
+    text = "Sadder",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  ),
+  list(
+    x = mean_endurance_index,
+    y = -0.05,
+    xref = "x",
+    yref = "y",
+    text = "37",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+# add correlation coefficient to figure
+
+correlation_coefficient_eight <- cor(final_df$Valence, final_df$Endurance_Index)
+
+
+fig_eight <- fig_eight %>% layout(annotations = list(
+  list(
+    x = 90,
+    y = 1.02,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_eight, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+# add line at mean endurance index
+
+fig_eight <- fig_eight %>% layout(shapes = list(
+  list(
+    type = "line",
+    x0 = mean_endurance_index,
+    y0 = 0,
+    x1 = mean_endurance_index,
+    y1 = 1,
+    line = list(color = "grey", width = 2)
+  )
+))
+
+fig_eight
+```
+
+##### Mood
+
+```{r Figure 9 : Endurance Index vs Mood, echo = FALSE, warning= FALSE, message = FALSE}
+# create mood variable which is average of valence and energy and danceability
+
+final_df <- final_df %>% mutate(Mood = (Valence + Energy + Danceability)/3)
+
+# create table using plotly which shows the relationship between mood and endurance index
+
+fig_nine <- plot_ly(
+  final_df, x = ~Endurance_Index, y = ~Mood,
+  color = ~Endurance_Index, size = ~Mood, text = ~paste("Artist: ", Artist_Name, "Track: ", track_name, "<br>Ranking: ", Ranking, "<br>Endurance Index: ", Endurance_Index, "<br>Mood: ", Mood)
+) %>%
+  layout(
+    title = '<b>Figure 9 : Endurance Index vs Mood<b>',
+    xaxis = list(title = "Endurance Index (Spotify & Billboard)"),
+    yaxis = list(title = "Mood (Valence + Energy + Danceability - Spotify)"),
+    shapes = list(
+      list(
+        type = "line",
+        x0 = 0,
+        y0 = 0.50,
+        x1 = 100,
+        y1 = 0.50,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = 50,
+        y0 = 0,
+        x1 = 50,
+        y1 = 1,
+        line = list(color = "grey", width = 2)
+      ),
+      list(
+        type = "line",
+        x0 = mean_endurance_index,
+        y0 = 0,
+        x1 = mean_endurance_index,
+        y1 = 1,
+        line = list(color = "#e7a4b6", width = 2)
+      )
+    )
+  )
+
+# add label at ranking = 51 and popularity = 1 as "Least Enduring", label at ranking = 1 and popularity = 100 as "Most Enduring", and label at ranking = 99 and popularity = 51 as "Musically Positive" and label at ranking = 1 and popularity = 51 as "Musically Negative"
+
+fig_nine <- fig_nine %>% layout(annotations = list(
+  list(
+    x = 92,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Most Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 10,
+    y = 0.52,
+    xref = "x",
+    yref = "y",
+    text = "Least Enduring",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = -40,
+    ay = 0
+  ),
+  list(
+    x = 51,
+    y = 1.02,
+    xref = "x",
+    yref = "y",
+    text = "Musically Positive (Danceable, Energetic & Happy)",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  ),
+  list(
+    x = 51,
+    y = -0.02,
+    xref = "x",
+    yref = "y",
+    text = "Musically Negative (Slow, Calm & Sad)",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  ),
+  list(
+    x = mean_endurance_index,
+    y = -0.05,
+    xref = "x",
+    yref = "y",
+    text = "37",
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = -40
+  )
+))
+
+
+# add correlation coefficient to figure
+
+correlation_coefficient_nine <- cor(final_df$Mood, final_df$Endurance_Index)
+
+
+fig_nine <- fig_nine %>% layout(annotations = list(
+  list(
+    x = 90,
+    y = 0.98,
+    xref = "x",
+    yref = "y",
+    text = paste("Correlation Coefficient: ", round(correlation_coefficient_nine, 2)),
+    showarrow = FALSE,
+    arrowhead = 0,
+    ax = 0,
+    ay = 40
+  )
+))
+
+# add line at mean endurance index
+
+fig_nine <- fig_nine %>% layout(shapes = list(
+  list(
+    type = "line",
+    x0 = mean_endurance_index,
+    y0 = 0,
+    x1 = mean_endurance_index,
+    y1 = 1,
+    line = list(color = "grey", width = 2)
+  )
+))
+
+fig_nine
+```
+
+## Conclusion
+
+In conclusion, the music of the 100 Greatest has endured well if we look at current popularity but fairs worse when considering popularity over a longer period of time. Hip hop 80s-00s danceable music seems to have endured the best. Accordingly, the most enduring artist is 00s hip hop artist Eminem who has a danceability score of 91%. 
+
+## Code Appendix
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE} 
+```
